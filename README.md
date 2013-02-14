@@ -49,17 +49,17 @@ Your app needs to know the consumer-key and -secret for the container it is enab
 
 ```python
 ENDPOINTS = {
-	"http://sandbox.smartplatforms.org:7000": {
-		"name": "SMART Sandbox",
-		"app_id": "app@apps.chip.org",
-		"consumer_key": "app@apps.chip.org",
-		"consumer_secret": "abcdefg"
+	"http://sandbox-rest.smartplatforms.org:7000": {
+		"name": "REST Sandbox",
+		"app_id": "rest-example@apps.smartplatforms.org",
+		"consumer_key": "rest-example@apps.smartplatforms.org",
+		"consumer_secret": "hAkIjrDeBpJlfeJl"
 	},
 	"http://localhost:7000": {
 		"name": "Localhost",
-		"app_id": "app@apps.chip.org",
-		"consumer_key": "app@apps.chip.org",
-		"consumer_secret": "hijklmn"
+		"app_id": "rest-example@apps.smartplatforms.org",
+		"consumer_key": "rest-example@apps.smartplatforms.org",
+		"consumer_secret": "yyyy"
 	}
 }
 ```

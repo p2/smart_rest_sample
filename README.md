@@ -30,7 +30,7 @@ The `wsgi.py` file is where the request-to-Python mapping happens. Our app defin
 
 ### AppFog ###
 
-The app has a `requirements.txt` file and can readily be used as a bottle-app on [AppFog].
+The app has a `manifest.yml` and `requirements.txt` file and can thus readily be used as a bottle-app on [AppFog].
 
 [bottle]: http://bottlepy.org/
 [client]: https://github.com/chb/smart_client_python

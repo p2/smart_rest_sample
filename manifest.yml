@@ -1,0 +1,14 @@
+--- 
+applications: 
+  .: 
+    mem: 64M
+    instances: 1
+    infra: aws
+    url: ${name}.${target-base}
+    framework: 
+      info: 
+        mem: 64M
+        exec: 
+        description: Python WSGI Application
+      name: wsgi
+    name: smart-rest-sample

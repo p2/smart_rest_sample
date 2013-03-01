@@ -1,7 +1,7 @@
 {
 	"name": "SMART REST", 
 	"description": "SMART REST example app", 
-	"author": "Pascal Pfiffner, Harvard Medical School", 
+	"author": "Pascal Pfiffner and Arjun Sanyal, Harvard Medical School", 
 	"id": "rest-example@apps.smartplatforms.org", 
 	"mode": "ui", 
 	"scope": "record", 

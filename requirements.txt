@@ -1,5 +1,5 @@
-bottle
+pyparsing==1.5.7
+flask
 oauth2
 rdflib
 rdfextras
-jinja2

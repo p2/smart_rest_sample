@@ -30,13 +30,13 @@ else:
 _smart = None  # A global flag to check is the SMARTClient is configured
 
 def _smart_client(api_base, record_id=None):
-    """ Returns the SMART client, configured accordingly """
+    """ Returns the SMART client, configured accordingly. """
     global _smart
     if _smart is None or _smart.api_base != api_base:
         server = ENDPOINTS.get(api_base)
         if server is None:
             logging.error("There is no server with base URI %s" % api_base)
-            bottle.abort(404)
+            flask.abort(404)
             return None
 
         # instantiate
@@ -48,8 +48,8 @@ def _smart_client(api_base, record_id=None):
 
 # ------------------------------------------------------------ Token Handling
 def _test_record_token(api_base, record_id, token):
-    """ Tries to fetch demographics with the given token and returns
-        a bool whether thas was successful """
+    """ Tries to fetch demographics with the given token and returns a
+        bool whether thas was successful. """
 
     smart = _smart_client(api_base, record_id)
     smart.update_token(token)
@@ -64,7 +64,7 @@ def _test_record_token(api_base, record_id, token):
 
 
 def _request_token_for_record_if_needed(api_base, record_id):
-    """ Requests a request token for record id, if needed """
+    """ Requests a request token for record id, if needed. """
     ts = TokenStore()
     token = ts.tokenForRecord(api_base, record_id)
 
@@ -90,14 +90,14 @@ def _request_token_for_record_if_needed(api_base, record_id):
 
     # now go and authorize the token
     logging.debug("redirecting to authorize token")
-    bottle.redirect(smart.auth_redirect_url)
+    flask.redirect(smart.auth_redirect_url)
     return True, None
 
 
 def _exchange_token(req_token, verifier):
     """ Takes the request token and the verifier, obtained in our authorize
         callback, and exchanges it for an access token. Stores the access
-        token and returns api_base and record_id as tuple."""
+        token and returns api_base and record_id as tuple. """
     ts = TokenStore()
     full_token, api_base, record_id = ts.tokenServerRecordForToken(req_token)
     if record_id is None:
@@ -126,13 +126,13 @@ def _exchange_token(req_token, verifier):
 @app.get('/')
 @app.get('/index.html')
 def index():
-    """ The index page makes sure we select a patient and we have a token """
-    api_base = bottle.request.query.get('api_base')
-    record_id = bottle.request.query.get('record_id')
+    """ The index page makes sure we select a patient and we have a token. """
+    api_base = flask.request.args.get('api_base')
+    record_id = flask.request.args.get('record_id')
 
     # no endpoint, show selector
     if api_base is None:
-        bottle.redirect('endpoint_select')
+        flask.redirect('/endpoint_select')
         return
 
     smart = _smart_client(api_base, record_id)
@@ -143,7 +143,7 @@ def index():
         if launch is None:
             return "Unknown app start URL, cannot launch without a record id"
 
-        bottle.redirect(launch)
+        flask.redirect(launch)
         return
 
     # do we have a token?
@@ -184,11 +184,11 @@ def index():
 @app.get('/endpoint_select')
 def endpoint():
     """ Shows all possible endpoints, sending the user back to index when
-        one is chosen """
+        one is chosen. """
 
     # get the callback NOTE: this is done very cheaply, we need to make
     # sure to end the callback url with either "?" or "&"
-    callback = bottle.request.query.get('callback', 'index.html?')
+    callback = flask.request.args.get('callback', 'index.html?')
     if '?' != callback[-1] and '&' != callback[-1]:
         callback += '&' if '?' in callback else '?'
 
@@ -207,12 +207,13 @@ def endpoint():
 # ------------------------------------------------------------- Authorization
 @app.get('/authorize')
 def authorize():
-    """ Extract the oauth_verifier and exchange it for an access token """
-    req_token = {'oauth_token': bottle.request.query.get('oauth_token')}
-    verifier = bottle.request.query.get('oauth_verifier')
+    """ Extract the oauth_verifier and exchange it for an access token. """
+    req_token = {'oauth_token': flask.request.args.get('oauth_token')}
+    verifier = flask.request.args.get('oauth_verifier')
     api_base, record_id = _exchange_token(req_token, verifier)
+
     if record_id is not None:
-        bottle.redirect('/index.html?api_base=%s&record_id=%s' % (api_base, record_id))
+        flask.redirect('/index.html?api_base=%s&record_id=%s' % (api_base, record_id))
 
     # no record id
-    bottle.abort(400)
+    flask.abort(400)

@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SMART REST App</title>
+  <link rel="stylesheet" type="text/css" href="static/style.css" />
+</head>
+<body>
+  <div id="container">
+    <h1>REST App</h1>
+    <h2>Choose a SMART container</h2>
+    <div id="endpoints">
+      {% for ep in endpoints %}
+      <div>
+      <a href="{{ callback }}api_base={{ ep.url }}">
+        {{ ep.name }}
+        <span>{{ ep.url }}</span>
+      </a>
+      </div>
+      {% else %}
+      <span>No SMART containers have been defined</span>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

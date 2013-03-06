@@ -12,10 +12,9 @@ from settings import ENDPOINTS
 # the static files, but static file URLs start with /static/
 application = app = flask.Flask(  # Appfog needs "application" here
     'wsgi',
-    template_folder='app'
+    template_folder='app',
     static_folder='app',
-    static_url_path='/static',
-    files
+    static_url_path='/static'
 )
 
 # Debugging and logging configuration
@@ -123,8 +122,8 @@ def _exchange_token(req_token, verifier):
 
 
 # -------------------------------------------------------------------- Index
-@app.get('/')
-@app.get('/index.html')
+@app.route('/')
+@app.route('/index.html')
 def index():
     """ The index page makes sure we select a patient and we have a token. """
     api_base = flask.request.args.get('api_base')
@@ -132,8 +131,7 @@ def index():
 
     # no endpoint, show selector
     if api_base is None:
-        flask.redirect('/endpoint_select')
-        return
+        return flask.redirect('/endpoint_select')
 
     smart = _smart_client(api_base, record_id)
 
@@ -143,8 +141,8 @@ def index():
         if launch is None:
             return "Unknown app start URL, cannot launch without a record id"
 
-        flask.redirect(launch)
-        return
+        logging.debug('smart.launch_url: ' + launch)
+        return flask.redirect(launch)
 
     # do we have a token?
     did_fetch, error_msg = _request_token_for_record_if_needed(api_base,
@@ -174,14 +172,13 @@ def index():
         res = list(results)[0]
         record_name = '%s %s' % (res[0], res[1])
 
-    # render index
-    template = _jinja.get_template('index.html')
-    return template.render(api_base=api_base,
-                           record_id=record_id,
-                           record_name=record_name)
+    return flask.render_template('index.html',
+                                 api_base=api_base,
+                                 record_id=record_id,
+                                 record_name=record_name)
 
 
-@app.get('/endpoint_select')
+@app.route('/endpoint_select')
 def endpoint():
     """ Shows all possible endpoints, sending the user back to index when
         one is chosen. """
@@ -199,13 +196,13 @@ def endpoint():
             "url": api_base
         })
 
-    # render selections
-    template = _jinja.get_template('endpoint_select.html')
-    return template.render(endpoints=available, callback=callback)
+    return flask.render_template('endpoint_select.html',
+                                 endpoints=available,
+                                 callback=callback)
 
 
 # ------------------------------------------------------------- Authorization
-@app.get('/authorize')
+@app.route('/authorize')
 def authorize():
     """ Extract the oauth_verifier and exchange it for an access token. """
     req_token = {'oauth_token': flask.request.args.get('oauth_token')}
@@ -217,3 +214,6 @@ def authorize():
 
     # no record id
     flask.abort(400)
+
+if __name__ == '__main__':
+    app.run()

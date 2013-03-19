@@ -27,6 +27,7 @@ else:
 # ------------------------------------------------------ SMARTClient Init
 _smart = None  # A global flag to check is the SMARTClient is configured
 
+
 def _smart_client(api_base, record_id=None):
     """ Returns the SMART client, configured accordingly. """
     global _smart
@@ -43,6 +44,7 @@ def _smart_client(api_base, record_id=None):
 
     _smart.record_id = record_id
     return _smart
+
 
 # ------------------------------------------------------------ Token Handling
 def _test_record_token(api_base, record_id, token):
@@ -72,7 +74,8 @@ def _request_token_for_record_if_needed(api_base, record_id):
         return False, None
 
     # request a token
-    logging.debug("requesting token for record %s on %s" % (record_id, api_base))
+    logging.debug("requesting token for record %s on %s" %
+                  (record_id, api_base))
     smart = _smart_client(api_base, record_id)
     smart.token = None
     try:
@@ -208,7 +211,7 @@ def authorize():
 
     if record_id is not None:
         flask.redirect('/index.html?api_base=%s&record_id=%s' %
-                (api_base, record_id))
+                       (api_base, record_id))
 
     # no record id
     flask.abort(400)

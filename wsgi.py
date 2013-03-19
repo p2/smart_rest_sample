@@ -3,14 +3,13 @@
 import flask
 import json
 import logging
-
-from tokenstore import TokenStore
+import tokenstore
+import settings
 from smart_client_python.client import SMARTClient
-from settings import ENDPOINTS
 
 # Note: We're using ./app for the template directory and also for
 # the static files, but static file URLs start with /static/
-application = app = flask.Flask(  # Appfog needs "application" here
+application = app = flask.Flask(  # Some PaaS need "application" here
     'wsgi',
     template_folder='app',
     static_folder='app',
@@ -32,7 +31,7 @@ def _smart_client(api_base, record_id=None):
     """ Returns the SMART client, configured accordingly. """
     global _smart
     if _smart is None or _smart.api_base != api_base:
-        server = ENDPOINTS.get(api_base)
+        server = settings.ENDPOINTS.get(api_base)
         if server is None:
             logging.error("There is no server with base URI %s" % api_base)
             flask.abort(404)
@@ -64,7 +63,7 @@ def _test_record_token(api_base, record_id, token):
 
 def _request_token_for_record_if_needed(api_base, record_id):
     """ Requests a request token for record id, if needed. """
-    ts = TokenStore()
+    ts = tokenstore.TokenStore()
     token = ts.tokenForRecord(api_base, record_id)
 
     # we already got a token, test if it still works
@@ -87,9 +86,6 @@ def _request_token_for_record_if_needed(api_base, record_id):
                                                         token):
         return False, "Failed to store request token"
 
-    # now go and authorize the token
-    logging.debug("redirecting to authorize token")
-    flask.redirect(smart.auth_redirect_url)
     return True, None
 
 
@@ -97,7 +93,7 @@ def _exchange_token(req_token, verifier):
     """ Takes the request token and the verifier, obtained in our authorize
         callback, and exchanges it for an access token. Stores the access
         token and returns api_base and record_id as tuple. """
-    ts = TokenStore()
+    ts = tokenstore.TokenStore()
     full_token, api_base, record_id = ts.tokenServerRecordForToken(req_token)
     if record_id is None:
         logging.error("Unknown token, cannot exchange %s" % req_token)
@@ -148,8 +144,9 @@ def index():
     did_fetch, error_msg = _request_token_for_record_if_needed(api_base,
                                                                record_id)
     if did_fetch:
-        # call above will redirect if true anyway, but let's be sure to exit
-        return
+        # now go and authorize the token
+        logging.debug("redirecting to authorize token")
+        flask.redirect(smart.auth_redirect_url)
     if error_msg:
         return error_msg
 
@@ -190,7 +187,7 @@ def endpoint():
         callback += '&' if '?' in callback else '?'
 
     available = []
-    for api_base, srvr in ENDPOINTS.iteritems():
+    for api_base, srvr in settings.ENDPOINTS.iteritems():
         available.append({
             "name": srvr.get('name', 'Unnamed'),
             "url": api_base
@@ -210,7 +207,8 @@ def authorize():
     api_base, record_id = _exchange_token(req_token, verifier)
 
     if record_id is not None:
-        flask.redirect('/index.html?api_base=%s&record_id=%s' % (api_base, record_id))
+        flask.redirect('/index.html?api_base=%s&record_id=%s' %
+                (api_base, record_id))
 
     # no record id
     flask.abort(400)

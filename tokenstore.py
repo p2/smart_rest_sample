@@ -6,6 +6,7 @@
 
 import os.path
 from os import makedirs
+from uuid import uuid4
 
 from sqlite import SQLite
 
@@ -24,29 +25,24 @@ class TokenStore(object):
 	
 	
 	# -------------------------------------------------------------------------- Token Storage
-	def tokenForRecord(self, api_base, record_id):
-		""" Returns the desired token as a dict in the form:
-			{
-				'oauth_token': token
-				'oauth_token_secret': secret
-			}
-		"""
-		query = "SELECT token, secret FROM record_tokens WHERE record_id = ? AND on_server = ?"
-		res = self.sqlite.executeOne(query, (record_id, api_base))
-		if res is None:
-			return None
-		
-		return {
-			'oauth_token': res[0],
-			'oauth_token_secret': res[1]
-		}
-	
 	def tokenServerRecordForToken(self, token):
 		""" Returns a token/secret dict, server url and the record id as a tuple (if the token is known) """
 		query = "SELECT token, secret, on_server, record_id FROM record_tokens WHERE token = ?"
 		res = self.sqlite.executeOne(query, (token.get('oauth_token'),))
 		if res is None:
-			return None, None
+			return None, None, None
+		
+		return {
+			'oauth_token': res[0],
+			'oauth_token_secret': res[1]
+		}, res[2], res[3]
+	
+	def tokenServerRecordForCookie(self, cookie):
+		""" Returns a token/secret dict, server url and the record id as a tuple (if the token is known) """
+		query = "SELECT token, secret, on_server, record_id FROM record_tokens WHERE cookie = ?"
+		res = self.sqlite.executeOne(query, (cookie,))
+		if res is None:
+			return None, None, None
 		
 		return {
 			'oauth_token': res[0],
@@ -54,20 +50,20 @@ class TokenStore(object):
 		}, res[2], res[3]
 	
 	def storeTokenForRecord(self, api_base, record_id, token):
-		""" Stores a token.
+		""" Stores a token and returns the cookie hash.
 		Note that record/server combinations are unique, older pairs will be replaced by this call. You must provide
 		the token as a dictionary with "oauth_token" and "oauth_token_secret" keys.
 		"""
+		cookie = unicode(uuid4())
 		query = """INSERT OR REPLACE INTO record_tokens
-			(record_id, on_server, token, secret)
-			VALUES (?, ?, ?, ?)"""
-		params = (record_id, api_base, token.get('oauth_token'), token.get('oauth_token_secret'))
+			(record_id, on_server, cookie, token, secret)
+			VALUES (?, ?, ?, ?, ?)"""
+		params = (record_id, api_base, cookie, token.get('oauth_token'), token.get('oauth_token_secret'))
 		if 0 == self.sqlite.executeInsert(query, params):
-			return False
+			return None
 		
 		self.sqlite.commit()
-		return True
-			
+		return cookie
 	
 	def removeRecordToken(self, token):
 		""" Deletes a token
@@ -105,6 +101,7 @@ class TokenStore(object):
 					token_id INTEGER PRIMARY KEY,
 					record_id INT,
 					on_server VARCHAR,
+					cookie VARCHAR,
 					token VARCHAR,
 					secret VARCHAR,
 					added TIMESTAMP,
@@ -112,6 +109,7 @@ class TokenStore(object):
 				)''')
 			sql.execute("CREATE INDEX IF NOT EXISTS record_index ON record_tokens (record_id)")
 			sql.execute("CREATE INDEX IF NOT EXISTS server_index ON record_tokens (on_server)")
+			sql.execute("CREATE INDEX IF NOT EXISTS cookie_index ON record_tokens (cookie)")
 			sql.execute("CREATE INDEX IF NOT EXISTS token_index ON record_tokens (token)")
 		
 		cls.did_setup = True

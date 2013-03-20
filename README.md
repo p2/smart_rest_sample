@@ -48,20 +48,22 @@ Settings
 Your app needs to know the consumer-key and -secret for the container it is enabled for. For this we create the file `settings.py`:
 
 ```python
-ENDPOINTS = {
-	"http://sandbox-rest.smartplatforms.org:7000": {
+ENDPOINTS = [
+	{
+		"url": "http://sandbox-rest.smartplatforms.org:7000",
 		"name": "REST Sandbox",
 		"app_id": "rest-example@apps.smartplatforms.org",
 		"consumer_key": "rest-example@apps.smartplatforms.org",
 		"consumer_secret": "hAkIjrDeBpJlfeJl"
 	},
-	"http://localhost:7000": {
+	{
+		"url": "http://localhost:7000",
 		"name": "Localhost",
 		"app_id": "rest-example@apps.smartplatforms.org",
 		"consumer_key": "rest-example@apps.smartplatforms.org",
 		"consumer_secret": "yyyy"
 	}
-}
+]
 ```
 
 This defines two containers that your app has a key and a secret for, one is our sandbox and one could be a local SMART installation for testing.
@@ -92,4 +94,4 @@ The user will be prompted to login and select a record. Upon selecting a record 
 OAuth Dance
 -----------
 
-At this point you should have both parameters and you can start the OAuth dance. The sample app stores the tokens with their associated api_base and record_id in a local sqlite database, see `tokenstore.py` for details.
+At this point you should have both parameters and you can start the OAuth dance. The sample app stores the tokens with their associated api_base and record_id in a local sqlite database, tied to a cookie that gets set in the user's browser. See `tokenstore.py` for details.

@@ -157,6 +157,7 @@ def _exchange_token(req_token, verifier):
 # ------------------------------------------------------------------------------ Index
 @app.get('/')
 @app.get('/index.html')
+@app.get('/smartapp/index.html')
 def index():
 	""" The index page makes sure we select a patient and we have a token """
 	api_base = bottle.request.query.get('api_base')
@@ -214,6 +215,7 @@ def index():
 
 
 @app.get('/endpoint_select')
+@app.get('/smartapp/endpoint_select')
 def endpoint():
 	""" Shows all possible endpoints, sending the user back to index when one is chosen """
 	
@@ -235,6 +237,7 @@ def endpoint():
 
 # ------------------------------------------------------------------------------ Authorization
 @app.get('/authorize')
+@app.get('/smartapp/authorize')
 def authorize():
 	""" Extract the oauth_verifier and exchange it for an access token """
 	req_token = {'oauth_token': bottle.request.query.get('oauth_token')}

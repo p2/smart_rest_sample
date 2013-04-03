@@ -20,12 +20,12 @@ Python modules you will need:
 * rdfextras
 * jinja2
 
-Then just run the `server.py` script, it will run a local webserver on port `8008`. To register the app on a SMART container you can use the supplied `manifest.json` file.
+Then just run the `server.py` script, it will run a local webserver on port `8000`. To register the app on a SMART container you can use the supplied `manifest.json` file, but out of the box it is configured to run against our [sandbox] and you can just start it up.
 
 The `wsgi.py` file is where the request-to-Python mapping happens. Our app defines three URLs:
 
-* `index`: The main URL
-* `endpoint_select`: Where we show the possible endpoints
+* `index.html`: The main URL
+* `endpoint_select`: Where we show the possible endpoints (SMART containers)
 * `authorize`: For the OAuth callback
 
 ### AppFog ###
@@ -35,6 +35,7 @@ The app has a `manifest.yml` and `requirements.txt` file and can thus readily be
 [bottle]: http://bottlepy.org/
 [client]: https://github.com/chb/smart_client_python
 [appfog]: https://www.appfog.com
+[sandbox]: http://sandbox-v06.smartplatforms.org
 
 
 REST App Behavior
@@ -50,11 +51,11 @@ Your app needs to know the consumer-key and -secret for the container it is enab
 ```python
 ENDPOINTS = [
 	{
-		"url": "http://sandbox-rest.smartplatforms.org:7000",
-		"name": "REST Sandbox",
-		"app_id": "rest-example@apps.smartplatforms.org",
-		"consumer_key": "rest-example@apps.smartplatforms.org",
-		"consumer_secret": "hAkIjrDeBpJlfeJl"
+		"url": "http://sandbox-api-v06.smartplatforms.org:80",
+		"name": "SMART Sandbox",
+		"app_id": "my-app@apps.smartplatforms.org",
+		"consumer_key": "my-app@apps.smartplatforms.org",
+		"consumer_secret": "smartapp-secret"
 	},
 	{
 		"url": "http://localhost:7000",

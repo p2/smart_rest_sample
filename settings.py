@@ -2,11 +2,11 @@
 
 ENDPOINTS = [
     {
-        "url": "http://sandbox-rest.smartplatforms.org:7000",
-        "name": "REST Sandbox",
-        "app_id": "rest-example@apps.smartplatforms.org",
-        "consumer_key": "rest-example@apps.smartplatforms.org",
-        "consumer_secret": "hAkIjrDeBpJlfeJl"
+        "url": "http://sandbox-api-v06.smartplatforms.org:80",
+        "name": "SMART Sandbox",
+        "app_id": "my-app@apps.smartplatforms.org",
+        "consumer_key": "my-app@apps.smartplatforms.org",
+        "consumer_secret": "smartapp-secret"
     },
     {
         "url": "http://localhost:7000",
